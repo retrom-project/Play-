@@ -799,6 +799,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 		m_debugger->close();
 		m_frameDebugger->close();
 #endif
+		m_virtualMachine->Pause();
 	}
 }
 
