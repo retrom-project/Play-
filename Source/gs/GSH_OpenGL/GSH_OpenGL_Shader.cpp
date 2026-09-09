@@ -188,6 +188,9 @@ Framework::OpenGl::CShader CGSH_OpenGL::GenerateFragmentShader(const SHADERCAPS&
 	shaderBuilder << "	uint g_alphaRef;" << std::endl;
 	shaderBuilder << "	float g_alphaFix;" << std::endl;
 	shaderBuilder << "	vec3 g_fogColor;" << std::endl;
+#ifdef __EMSCRIPTEN__
+	shaderBuilder << "\tfloat g_texAlphaAsIndex;" << std::endl;
+#endif
 	shaderBuilder << "};" << std::endl;
 
 	if(caps.texClampS == TEXTURE_CLAMP_MODE_REGION_REPEAT || caps.texClampT == TEXTURE_CLAMP_MODE_REGION_REPEAT)
@@ -196,6 +199,14 @@ Framework::OpenGl::CShader CGSH_OpenGL::GenerateFragmentShader(const SHADERCAPS&
 		shaderBuilder << s_orFunction << std::endl;
 	}
 
+	// WebGL2 has no GL_TEXTURE_SWIZZLE_R; select framebuffer alpha in GLSL.
+	shaderBuilder << "float readTextureIndex(vec2 uv) { vec4 sampleColor = texture(g_texture, uv); return "
+#ifdef __EMSCRIPTEN__
+	              << "(g_texAlphaAsIndex > 0.5 ? sampleColor.a : sampleColor.r)"
+#else
+	              << "sampleColor.r"
+#endif
+	              << " * 255.0; }" << std::endl;
 	shaderBuilder << "float combineColors(float a, float b)" << std::endl;
 	shaderBuilder << "{" << std::endl;
 	shaderBuilder << "	uint aInt = uint(a * 255.0);" << std::endl;
@@ -254,7 +265,7 @@ Framework::OpenGl::CShader CGSH_OpenGL::GenerateFragmentShader(const SHADERCAPS&
 	{
 		if(!caps.texBilinearFilter)
 		{
-			shaderBuilder << "	float colorIndex = texture(g_texture, texCoord.st).r * 255.0;" << std::endl;
+			shaderBuilder << "	float colorIndex = readTextureIndex(texCoord.st);" << std::endl;
 			if(caps.texSourceMode == TEXTURE_SOURCE_MODE_IDX4)
 			{
 				shaderBuilder << "	float paletteTexelBias = 0.5 / 16.0;" << std::endl;
@@ -268,10 +279,10 @@ Framework::OpenGl::CShader CGSH_OpenGL::GenerateFragmentShader(const SHADERCAPS&
 		}
 		else
 		{
-			shaderBuilder << "	float tlIdx = texture(g_texture, texCoord.st                                     ).r * 255.0;" << std::endl;
-			shaderBuilder << "	float trIdx = texture(g_texture, texCoord.st + vec2(g_texelSize.x, 0)            ).r * 255.0;" << std::endl;
-			shaderBuilder << "	float blIdx = texture(g_texture, texCoord.st + vec2(0, g_texelSize.y)            ).r * 255.0;" << std::endl;
-			shaderBuilder << "	float brIdx = texture(g_texture, texCoord.st + vec2(g_texelSize.x, g_texelSize.y)).r * 255.0;" << std::endl;
+			shaderBuilder << "	float tlIdx = readTextureIndex(texCoord.st                                     );" << std::endl;
+			shaderBuilder << "	float trIdx = readTextureIndex(texCoord.st + vec2(g_texelSize.x, 0)            );" << std::endl;
+			shaderBuilder << "	float blIdx = readTextureIndex(texCoord.st + vec2(0, g_texelSize.y)            );" << std::endl;
+			shaderBuilder << "	float brIdx = readTextureIndex(texCoord.st + vec2(g_texelSize.x, g_texelSize.y));" << std::endl;
 
 			if(caps.texSourceMode == TEXTURE_SOURCE_MODE_IDX4)
 			{

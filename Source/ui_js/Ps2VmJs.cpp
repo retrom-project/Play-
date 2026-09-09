@@ -5,6 +5,37 @@
 #include "PS2VM_Preferences.h"
 #include "AppConfig.h"
 
+std::future<bool> CPs2VmJs::RetromBarrier(bool resume)
+{
+	auto result = std::make_shared<std::promise<bool>>();
+	auto future = result->get_future();
+	m_mailBox.SendCall([this, result, resume]() {
+		if(resume) ResumeImpl();
+		result->set_value(true);
+	});
+	return future;
+}
+
+std::future<bool> CPs2VmJs::RetromBoot(std::string path)
+{
+	auto result = std::make_shared<std::promise<bool>>();
+	auto future = result->get_future();
+	m_mailBox.SendCall([this, result, path]() {
+		try
+		{
+			CAppConfig::GetInstance().SetPreferencePath(PREF_PS2_CDROM0_PATH, path);
+			Reset();
+			if(path.size() >= 4 && path.substr(path.size() - 4) == ".elf")
+				m_ee->m_os->BootFromFile(path);
+			else
+				m_ee->m_os->BootFromCDROM();
+			result->set_value(true);
+		}
+		catch(...) { result->set_value(false); }
+	});
+	return future;
+}
+
 extern "C" uint32 LWL_Proxy(uint32, uint32, CMIPS*);
 extern "C" uint32 LWR_Proxy(uint32, uint32, CMIPS*);
 extern "C" uint64 LDL_Proxy(uint32, uint64, CMIPS*);

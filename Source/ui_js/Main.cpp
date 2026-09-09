@@ -7,6 +7,7 @@
 #include "InputProviderEmscripten.h"
 #include "ui_shared/StatsManager.h"
 #include "DefaultAppConfig.h"
+#include "RetromPad.h"
 
 CPs2VmJs* g_virtualMachine = nullptr;
 CGSHandler::NewFrameEvent::Connection g_gsNewFrameConnection;
@@ -45,6 +46,7 @@ extern "C" void initVm()
 	attr.majorVersion = 2;
 	attr.minorVersion = 0;
 	attr.alpha = false;
+	attr.preserveDrawingBuffer = true;
 	g_context = emscripten_webgl_create_context("#outputCanvas", &attr);
 	assert(g_context >= 0);
 
@@ -64,7 +66,7 @@ extern "C" void initVm()
 	}
 
 	{
-		g_virtualMachine->CreatePadHandler(CPH_GenericInput::GetFactoryFunction());
+		g_virtualMachine->CreatePadHandler(CRetromPad::Factory());
 		auto padHandler = static_cast<CPH_GenericInput*>(g_virtualMachine->GetPadHandler());
 		auto& bindingManager = padHandler->GetBindingManager();
 

@@ -9,4 +9,6 @@ public:
 
 	void BootElf(std::string);
 	void BootDiscImage(std::string);
+	std::future<bool> RetromBoot(std::string);
+	std::future<bool> RetromBarrier(bool);
 };

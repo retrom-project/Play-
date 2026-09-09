@@ -172,7 +172,7 @@ private:
 		uint32 alphaRef;
 		float alphaFix;
 		float fogColor[3];
-		float padding2;
+		float texAlphaAsIndex;
 	};
 	static_assert(sizeof(FRAGMENTPARAMS) == 0x40, "Size of FRAGMENTPARAMS must be 64 bytes.");
 
