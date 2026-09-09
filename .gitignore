@@ -40,3 +40,6 @@ xcuserdata
 
 # npm
 node_modules
+
+# Retrom local core build cache
+.retrom-build/

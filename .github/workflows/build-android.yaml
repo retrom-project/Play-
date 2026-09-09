@@ -1,6 +1,10 @@
 name: Build Android
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 env:
   ANDROID_BUILD_TOOLS_VERSION: '34.0.0'
   ANDROID_NDK_VERSION: '25.2.9519653'

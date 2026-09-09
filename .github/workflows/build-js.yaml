@@ -1,6 +1,10 @@
 name: Build JavaScript
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 jobs:
   build_js:
     runs-on: ubuntu-latest

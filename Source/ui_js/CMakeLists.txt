@@ -46,6 +46,9 @@ add_executable(Play
 	InputProviderEmscripten.cpp
 	InputProviderEmscripten.h
 	Main.cpp
+	RetromApi.cpp
+	RetromPad.cpp
+	RetromPad.h
 	Ps2VmJs.cpp
 	Ps2VmJs.h
 )
@@ -54,9 +57,8 @@ target_link_libraries(Play PUBLIC ${UI_JS_PROJECT_LIBS})
 target_link_options(Play PRIVATE "--bind")
 target_link_options(Play PRIVATE "-sMODULARIZE=1")
 target_link_options(Play PRIVATE "-sEXPORT_ES6=1")
-target_link_options(Play PRIVATE "-sUSE_ES6_IMPORT_META=0")
 target_link_options(Play PRIVATE "-sEXPORTED_FUNCTIONS=['_main', '_initVm', '_EmptyBlockHandler', '_MemoryUtils_GetByteProxy', '_MemoryUtils_GetHalfProxy', '_MemoryUtils_GetWordProxy', '_MemoryUtils_GetDoubleProxy', '_MemoryUtils_SetByteProxy', '_MemoryUtils_SetHalfProxy', '_MemoryUtils_SetWordProxy', '_MemoryUtils_SetDoubleProxy', '_LWL_Proxy', '_LWR_Proxy', '_LDL_Proxy', '_LDR_Proxy', '_SWL_Proxy', '_SWR_Proxy', '_SDL_Proxy', '_SDR_Proxy']")
-target_link_options(Play PRIVATE "-sEXPORTED_RUNTIME_METHODS=['ccall', 'FS']")
+target_link_options(Play PRIVATE "-sEXPORTED_RUNTIME_METHODS=['ccall', 'FS', 'HEAPU8', 'PThread', 'AL']")
 target_link_options(Play PRIVATE "-sFORCE_FILESYSTEM")
 target_link_options(Play PRIVATE "-sALLOW_TABLE_GROWTH")
 target_link_options(Play PRIVATE "-sALLOW_MEMORY_GROWTH")
