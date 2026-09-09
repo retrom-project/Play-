@@ -24,8 +24,10 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$GITHUB_REF_NAME" =~ ^retrom-core-g83700b2c31e5-r[1-9][0-9]*(-rc\.[1-9][0-9]*)?$ ]]
-          test "$(git cat-file -t "refs/tags/$GITHUB_REF_NAME")" = tag
-          test "$(git rev-list -n 1 "refs/tags/$GITHUB_REF_NAME")" = "$GITHUB_SHA"
+          remote_tag_ref="refs/retrom-release/$GITHUB_REF_NAME"
+          git fetch origin "refs/tags/$GITHUB_REF_NAME:$remote_tag_ref"
+          test "$(git cat-file -t "$remote_tag_ref")" = tag
+          test "$(git rev-list -n 1 "$remote_tag_ref")" = "$GITHUB_SHA"
           git fetch --no-tags origin retrom/g83700b2c31e5
           git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD
           git merge-base --is-ancestor 83700b2c31e593bc94e845b4b31b797be84dda59 "$GITHUB_SHA"
