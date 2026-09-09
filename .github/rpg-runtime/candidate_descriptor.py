@@ -149,7 +149,7 @@ def finalize(output: Path, core_id: str) -> None:
     actual = sorted(path.name for path in output.iterdir())
     if actual != expected:
         raise SystemExit("PFB_CANDIDATE_OUTPUT_INVALID")
-    branch = git_bytes("symbolic-ref", "--quiet", "--short", "HEAD").decode("utf-8").strip()
+    branch = git_bytes("rev-parse", "--abbrev-ref", "HEAD").decode("utf-8").strip()
     commit = git_bytes("rev-parse", "HEAD").decode("ascii").strip()
     dirty = bool(git_bytes("status", "--porcelain=v1", "-z"))
     files = [
