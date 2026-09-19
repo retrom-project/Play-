@@ -13,7 +13,7 @@
     }
   ],
   "releaseTagPattern": "^retrom-core-g83700b2c31e5-r[1-9][0-9]*(-rc\\.[1-9][0-9]*)?$",
-  "adapterAbi": "play-host-v1",
+  "adapterAbi": "play-host-v2",
   "releaseAssets": [
     "LICENSE",
     "Play.js",
@@ -21,7 +21,7 @@
     "checkpoint.mjs",
     "input.mjs",
     "play-retrom.mjs",
-    "range-device.mjs",
+    "disc-device.mjs",
     "rpg-runtime-release.json"
   ]
 }
