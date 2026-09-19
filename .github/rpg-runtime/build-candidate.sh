@@ -10,7 +10,7 @@ docker run --rm --user "$(id -u):$(id -g)" \
   emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7 \
   bash /source/.github/rpg-runtime/build-web.sh
 cp "$root/.retrom-build/web/Source/ui_js/Play.js" "$root/.retrom-build/web/Source/ui_js/Play.wasm" "$output/"
-cp "$root/js/retrom/play-retrom.mjs" "$root/js/retrom/range-device.mjs" \
+cp "$root/js/retrom/play-retrom.mjs" "$root/js/retrom/disc-device.mjs" \
   "$root/js/retrom/checkpoint.mjs" "$root/js/retrom/input.mjs" "$output/"
 python3 "$root/.github/rpg-runtime/licenses.py" "$root" "$output/LICENSE"
 python3 "$root/.github/rpg-runtime/candidate_descriptor.py" finalize "$output" --core-id play

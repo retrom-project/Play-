@@ -1,12 +1,18 @@
 import Play from './Play.js';
-import {RangeReader, persistentCache, discDevice} from './range-device.mjs';
+import {contentAbi, contractSha256, discDevice} from './disc-device.mjs';
 import {MAX_CHECKPOINT_BYTES, captureFiles, restoreFiles, encodeCheckpoint, decodeCheckpoint} from './checkpoint.mjs';
 import {bindInput} from './input.mjs';
 
-export const RETROM_PLAY_ABI = 'play-host-v1';
+export const RETROM_PLAY_ABI = 'play-host-v2';
+export {contentAbi, contractSha256};
 export const RETROM_PLAY_CHECKPOINT_MAX_BYTES = MAX_CHECKPOINT_BYTES;
 
 export async function createRetromPlay(options) {
+  if (options.content?.abi !== contentAbi || options.content.contractSha256 !== contractSha256 ||
+      options.content.disc?.abi !== contentAbi || options.content.disc.sizeBytes !== options.disc.sizeBytes ||
+      Object.keys(options.disc).sort().join(',') !== 'sha256,sizeBytes' || !/^[a-f0-9]{64}$/.test(options.disc.sha256)) {
+    throw Error('CONTENT_IO_ABI_MISMATCH');
+  }
   const win = options.target.ownerDocument.defaultView;
   const canvas = options.target.ownerDocument.createElement('canvas');
   canvas.id = 'outputCanvas'; canvas.setAttribute('aria-label', 'Play! PS2 game'); canvas.width = 640; canvas.height = 480; canvas.tabIndex = 0;
@@ -16,7 +22,7 @@ export async function createRetromPlay(options) {
   let failure = null;
   let module;
   let input;
-  const reader = new RangeReader({...options.disc, cache: persistentCache(win.caches, new URL(import.meta.url).origin)});
+  const reader = options.content.disc;
   const reportFailure = error => {
     if (stopped || failure) {return;}
     failure = error instanceof Error ? error : Error('PLAY_RUNTIME_FAILED');
@@ -25,8 +31,9 @@ export async function createRetromPlay(options) {
   async function stop() {
     if (stopped) {return;}
     stopped = true;
-    input?.stop(); reader.close();
+    input?.stop();
     module?.PThread.terminateAllThreads();
+    module?.discImageDevice?.close();
     for (const context of Object.values(module?.AL?.contexts ?? {})) {
       await context?.audioCtx?.close().catch(() => {});
     }
@@ -50,7 +57,8 @@ export async function createRetromPlay(options) {
     module.retromConfigure();
     const restored = options.restorePayload ? decodeCheckpoint(options.restorePayload, options.disc.sha256) : null;
     if (restored) {restoreFiles(module.FS, restored);}
-    const header = await reader.read(0, Math.min(8, options.disc.sizeBytes));
+    const header = new Uint8Array(Math.min(8, options.disc.sizeBytes));
+    await reader.readInto(0, header, options.signal);
     const extension = new TextDecoder().decode(header) === 'MComprHD' ? 'chd' : 'iso';
     await request(0, `game.${extension}`);
     if (restored) {await request(4);}
@@ -96,5 +104,5 @@ async function waitFor(poll, timeout, failure) {
 }
 
 if (typeof window !== 'undefined') {
-  window.__RETROM_PLAY_CORE_MODULE_V1__ = {RETROM_PLAY_ABI, RETROM_PLAY_CHECKPOINT_MAX_BYTES, createRetromPlay};
+  window.__RETROM_PLAY_CORE_MODULE_V1__ = {RETROM_PLAY_ABI, RETROM_PLAY_CHECKPOINT_MAX_BYTES, contentAbi, contractSha256, createRetromPlay};
 }
