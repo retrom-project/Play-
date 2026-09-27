@@ -1,9 +1,8 @@
-import Play from './Play.js';
 import {contentAbi, contractSha256, discDevice} from './disc-device.mjs';
 import {MAX_CHECKPOINT_BYTES, captureFiles, restoreFiles, encodeCheckpoint, decodeCheckpoint} from './checkpoint.mjs';
 import {bindInput} from './input.mjs';
 
-export const RETROM_PLAY_ABI = 'play-host-v2';
+export const RETROM_PLAY_ABI = 'play-host-v3';
 export {contentAbi, contractSha256};
 export const RETROM_PLAY_CHECKPOINT_MAX_BYTES = MAX_CHECKPOINT_BYTES;
 
@@ -45,9 +44,10 @@ export async function createRetromPlay(options) {
     await waitFor(() => module.retromPoll(), 30000, () => failure || stopped && Error('PLAY_RUNTIME_EXITED'));
   }
   try {
+    const {default: Play} = await import(assetURL(options.assets, 'Play.js'));
     module = await Play({canvas,
-      locateFile: name => new URL(name, import.meta.url).href,
-      mainScriptUrlOrBlob: new URL('Play.js', import.meta.url).href,
+      locateFile: name => assetURL(options.assets, name),
+      mainScriptUrlOrBlob: assetURL(options.assets, 'Play.js'),
       onAbort: () => reportFailure(Error('PLAY_CORE_ABORTED')),
     });
     if (options.signal?.aborted) {throw Error('PLAY_RUNTIME_EXITED');}
@@ -88,6 +88,12 @@ export async function createRetromPlay(options) {
     screenshot: () => new Promise((resolve, reject) => canvas.toBlob(blob => blob?.size ? resolve(blob) : reject(Error('PLAY_SCREENSHOT_FAILED')), 'image/png')),
     stop,
   };
+}
+
+function assetURL(assets, name) {
+  const url = assets?.[name];
+  if (typeof url !== 'string' || !url.startsWith('blob:')) throw Error('PLAY_ASSET_INVALID');
+  return url;
 }
 
 async function waitFor(poll, timeout, failure) {
