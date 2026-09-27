@@ -2,7 +2,7 @@ import {contentAbi, contractSha256, discDevice} from './disc-device.mjs';
 import {MAX_CHECKPOINT_BYTES, captureFiles, restoreFiles, encodeCheckpoint, decodeCheckpoint} from './checkpoint.mjs';
 import {bindInput} from './input.mjs';
 
-export const RETROM_PLAY_ABI = 'play-host-v2';
+export const RETROM_PLAY_ABI = 'play-host-v3';
 export {contentAbi, contractSha256};
 export const RETROM_PLAY_CHECKPOINT_MAX_BYTES = MAX_CHECKPOINT_BYTES;
 
