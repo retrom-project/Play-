@@ -1,5 +1,5 @@
 export const contentAbi = 'content-io-v1';
-export const contractSha256 = '9601f63ba9d1bad095b42b32a3d6167166535be246a87f0efac7c5b125ed27bf';
+export const contractSha256 = 'e1f59c8e5e6c1175444a09c0e8c8c4095a3be6d6c3d836a1c594e4f67f026e21';
 /** One native polling operation; all acquisition and caching belong to the Provider Reader. */
 export function discDevice(module, reader, reportFailure) {
   let done = true, failed = false, closed = false, active;
